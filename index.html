@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Xác Suất & Quá Trình Ngẫu Nhiên</title>
+    <!-- Chosen Palette: Calm Neutrals (Slate and Indigo) -->
+    <!-- Application Structure Plan: The application is designed as a Single Page Application (SPA) to function as an interactive practice tool. The core structure features a prominent dropdown menu allowing users to select one of 10 tests ('Đề'). Upon selection, the content area dynamically loads the four questions for that test, each presented in a distinct card. Every card includes the question and a button to toggle the visibility of its detailed solution. This design intentionally transforms the report's linear format into a user-driven, interactive experience. It promotes active learning and self-assessment by encouraging users to attempt problems before viewing the solutions, which is a more effective study method than passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Test Selection -> Goal: Easy Navigation -> Presentation: A prominent dropdown menu (`<select>`) at the top of the page. -> Interaction: An `onchange` event triggers a JavaScript function to dynamically load the selected test's content. -> Justification: This is a standard, space-saving, and intuitive UI component for selecting from a known set of options, ideal for navigating between the 10 tests.
+        - Question/Answer Pairs -> Goal: Facilitate Active Recall & Self-Assessment -> Presentation: Each question is housed in a clean "card" with a clear "Show/Hide Answer" button. The answer is initially hidden. -> Interaction: A simple `onclick` event on the button toggles the visibility of the answer section. -> Justification: This is the core interactive element that encourages users to solve problems independently before checking their work, significantly enhancing knowledge retention.
+        - Mathematical Formulas (LaTeX) -> Goal: Ensure Accurate & Readable Mathematical Notation -> Presentation: Use the KaTeX JavaScript library to render LaTeX expressions embedded in the HTML. -> Interaction: The rendering is automatic upon loading new content. -> Justification: KaTeX provides fast, high-quality rendering of complex mathematical notation, which is essential for the subject matter and far superior to using images or plain text.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMVIROPtCIDJ_Fo4GUad2BQthEzCs98dLMGAZG2IOu8SXlLsn" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind slate-50 */
+        }
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5em 0;
+        }
+        .prose {
+             --tw-prose-body: #334155; /* slate-700 */
+             --tw-prose-headings: #0f172a; /* slate-900 */
+             --tw-prose-bold: #1e293b; /* slate-800 */
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Ôn Tập Xác Suất & Quá Trình Ngẫu Nhiên</h1>
+            <p class="mt-2 text-lg text-slate-600">Một công cụ tương tác để luyện tập và kiểm tra kiến thức.</p>
+        </header>
+
+        <section id="interactive-tool" class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-center">Bảng điều khiển</h2>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex-grow">
+                        <label for="test-selector" class="block text-sm font-medium text-slate-700 mb-2">Chọn một đề để bắt đầu:</label>
+                        <select id="test-selector" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></select>
+                    </div>
+                </div>
+            </div>
+
+            <main id="test-content" class="space-y-6">
+                <!-- Content will be dynamically inserted here -->
+            </main>
+        </section>
+
+    </div>
+
+    <script>
+        const practiceData = [
+            {
+                title: "Đề 1",
+                questions: [
+                    { q: "Cho hàm mật độ xác suất đồng thời của hai biến ngẫu nhiên X và Y: $f(x, y) = cxy$ với $0 < x < 1$, $0 < y < 2$, và $f(x, y) = 0$ trong các trường hợp còn lại.<br>a) Tìm hằng số `c`.<br>b) Tìm hàm mật độ xác suất có điều kiện $f(x|y)$.<br>c) Tính kỳ vọng có điều kiện $E(X|Y=y)$.", a: "a) Ta có $\\int_{-\\infty}^{\\infty} \\int_{-\\infty}^{\\infty} f(x,y) \\,dx\\,dy = 1$.<br>$\\int_0^1 \\int_0^2 cxy \\,dy\\,dx = 1 \\Leftrightarrow c \\int_0^1 x \\left[\\frac{y^2}{2}\\right]_0^2 dx = 1 \\Leftrightarrow c \\int_0^1 2x \\,dx = 1 \\Leftrightarrow 2c \\left[\\frac{x^2}{2}\\right]_0^1 = 1 \\Leftrightarrow c=1$.<br><br>b) Hàm mật độ biên của Y: $f_Y(y) = \\int_0^1 xy \\,dx = y \\left[\\frac{x^2}{2}\\right]_0^1 = \\frac{y}{2}$ với $0 < y < 2$.<br>Hàm mật độ có điều kiện: $f(x|y) = \\frac{f(x,y)}{f_Y(y)} = \\frac{xy}{y/2} = 2x$ với $0 < x < 1$.<br><br>c) Kỳ vọng có điều kiện: $E(X|Y=y) = \\int_0^1 x \\cdot f(x|y) \\,dx = \\int_0^1 x(2x) \\,dx = 2 \\int_0^1 x^2 \\,dx = 2 \\left[\\frac{x^3}{3}\\right]_0^1 = \\frac{2}{3}$." },
+                    { q: "Một hệ thống máy tính có thể ở hai trạng thái: \"Hoạt động\" (H) hoặc \"Bị lỗi\" (L).<br>- Nếu máy đang \"Hoạt động\", xác suất nó vẫn \"Hoạt động\" trong giờ tiếp theo là 0.9.<br>- Nếu máy đang \"Bị lỗi\", xác suất nó được sửa và chuyển sang \"Hoạt động\" trong giờ tiếp theo là 0.6.<br>a) Xây dựng ma trận chuyển trạng thái P (H=1, L=2).<br>b) Tìm phân phối dừng.<br>c) Xích Markov này có phải là Ergodic không? Tại sao?", a: "a) Từ H (1) sang H (1) là 0.9, vậy sang L (2) là $1-0.9=0.1$.<br>Từ L (2) sang H (1) là 0.6, vậy ở lại L (2) là $1-0.6=0.4$.<br>Ma trận chuyển trạng thái: $P = \\begin{pmatrix} 0.9 & 0.1 \\\\ 0.6 & 0.4 \\end{pmatrix}$.<br><br>b) Gọi $\\pi = [\\pi_1, \\pi_2]$ là phân phối dừng. Ta có hệ $\\pi P = \\pi$ và $\\pi_1 + \\pi_2 = 1$.<br>$0.9\\pi_1 + 0.6\\pi_2 = \\pi_1 \\Rightarrow -0.1\\pi_1 + 0.6\\pi_2 = 0 \\Rightarrow \\pi_1 = 6\\pi_2$.<br>Thay vào $\\pi_1 + \\pi_2 = 1 \\Rightarrow 7\\pi_2 = 1 \\Rightarrow \\pi_2 = 1/7$.<br>Do đó $\\pi_1 = 6/7$. Phân phối dừng là $\\pi = [6/7, 1/7]$.<br><br>c) Xích Markov này là Ergodic. Lý do: <br>1. <b>Bất khả quy (Irreducible):</b> Mọi trạng thái đều có thể đến được từ mọi trạng thái khác (H↔L).<br>2. <b>Phi chu kỳ (Aperiodic):</b> Tồn tại ít nhất một trạng thái có thể tự quay trở lại chính nó ($P_{11}=0.9>0$)." },
+                    { q: "Xét quá trình ngẫu nhiên $X(t) = A\\cos(\\omega t)$, trong đó $\\omega$ là hằng số và A là biến ngẫu nhiên với $E[A] = 0$ và $Var(A) = \\sigma^2$. Chứng minh $X(t)$ không phải là quá trình dừng theo nghĩa rộng (WSS).", a: "Để là WSS, quá trình phải có:<br>1. Hàm trung bình là hằng số.<br>2. Hàm tự tương quan chỉ phụ thuộc vào khoảng chênh lệch thời gian $\\tau = t_1 - t_2$.<br><br>- <b>Hàm trung bình:</b><br>$m_X(t) = E[X(t)] = E[A\\cos(\\omega t)] = E[A]\\cos(\\omega t) = 0 \\cdot \\cos(\\omega t) = 0$.<br>Hàm trung bình là hằng số, điều kiện 1 thỏa mãn.<br><br>- <b>Hàm tự tương quan:</b><br>$R_{XX}(t_1, t_2) = E[X(t_1)X(t_2)] = E[(A\\cos(\\omega t_1))(A\\cos(\\omega t_2))] = E[A^2]\\cos(\\omega t_1)\\cos(\\omega t_2)$.<br>Ta có $Var(A) = E[A^2] - (E[A])^2 \\Rightarrow \\sigma^2 = E[A^2] - 0^2 \\Rightarrow E[A^2] = \\sigma^2$.<br>$R_{XX}(t_1, t_2) = \\sigma^2\\cos(\\omega t_1)\\cos(\\omega t_2)$.<br>Hàm này phụ thuộc vào $t_1$ và $t_2$ riêng lẻ, không chỉ phụ thuộc vào $\\tau$. Do đó, $X(t)$ không phải là WSS." },
+                    { q: "Xét quá trình ngẫu nhiên $Y(t) = B\\cos(\\omega t + \\Phi)$, trong đó $B, \\omega$ là hằng số, $\\Phi$ là BNN phân phối đều trên $[0, 2\\pi]$. Chứng minh $Y(t)$ là quá trình dừng theo nghĩa rộng (WSS).", a: "- <b>Hàm trung bình:</b><br>$m_Y(t) = E[B\\cos(\\omega t + \\Phi)] = B \\cdot E[\\cos(\\omega t + \\Phi)] = 0$. (Hằng số).<br><br>- <b>Hàm tự tương quan:</b><br>$R_{YY}(t_1, t_2) = E[B^2 \\cos(\\omega t_1+\\Phi)\\cos(\\omega t_2+\\Phi)] = \\frac{B^2}{2} E[\\cos(\\omega(t_1-t_2)) + \\cos(\\omega(t_1+t_2) + 2\\Phi)]$.<br>Term thứ hai bằng 0. Vậy $R_{YY}(t_1, t_2) = \\frac{B^2}{2} \\cos(\\omega(t_1-t_2))$.<br>Đặt $\\tau = t_1-t_2$, ta có $R_{YY}(\\tau) = \\frac{B^2}{2} \\cos(\\omega\\tau)$. Phụ thuộc vào $\\tau$.<br>Cả hai điều kiện đều thỏa mãn, vậy $Y(t)$ là WSS." }
+                ]
+            },
+            {
+                title: "Đề 2",
+                questions: [
+                    { q: "Cho hàm mật độ xác suất đồng thời: $f(x, y) = ce^{-x-2y}$ với $x > 0$, $y > 0$.<br>a) Tìm `c`.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $\\int_0^\\infty \\int_0^\\infty ce^{-x-2y} \\,dx\\,dy = \\frac{c}{2} = 1 \\Rightarrow c=2$.<br><br>b) $f_Y(y) = 2e^{-2y}$. $f(x|y) = \\frac{2e^{-x-2y}}{2e^{-2y}} = e^{-x}$.<br><br>c) $E(X|Y=y) = \\int_0^\\infty x e^{-x} \\,dx = 1$." },
+                    { q: "Một người đi làm có 3 lựa chọn: Xe buýt (B), Xe máy (M), Taxi (T).<br>- Nếu đi Buýt, mai đi Buýt (0.5), Máy (0.3).<br>- Nếu đi Máy, mai đi Buýt (0.4), Máy (0.4).<br>- Nếu đi Taxi, mai đi Buýt (0.6), Máy (0.4).<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.5 & 0.3 & 0.2 \\\\ 0.4 & 0.4 & 0.2 \\\\ 0.6 & 0.4 & 0 \\end{pmatrix}$.<br><br>b) Giải hệ $\\pi P = \\pi$ và $\\pi_1+\\pi_2+\\pi_3=1$. Ta được $\\pi \\approx [0.481, 0.352, 0.167]$.<br><br>c) Có. Vì xích bất khả quy và phi chu kỳ." },
+                    { q: "Cho $X(t) = A + Bt$, với A, B là BNN độc lập, $E[A] = 1, E[B] = 2, Var(A) = 1, Var(B) = 4$. Chứng minh $X(t)$ không dừng.", a: "$m_X(t) = E[A + Bt] = 1 + 2t$.<br>Vì hàm trung bình phụ thuộc vào $t$, quá trình không dừng." },
+                    { q: "Từ $X(t)$ ở Câu 3, định nghĩa $Y(t) = X(t+1) - X(t)$. Chứng minh $Y(t)$ là WSS.", a: "$Y(t) = [A + B(t+1)] - [A+Bt] = B$.<br>- $m_Y(t) = E[B] = 2$. (Hằng số).<br>- $R_{YY}(t_1, t_2) = E[B^2] = Var(B)+(E[B])^2 = 8$. (Hằng số).<br>Vậy $Y(t)$ là WSS." }
+                ]
+            },
+            {
+                title: "Đề 3", questions: [ { q: "Cho $f(x, y) = c(x + y)$ với $0 < x < 1, 0 < y < 1$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $\\int_0^1 \\int_0^1 c(x+y) dx dy = c=1$.<br>b) $f_Y(y) = \\frac{1}{2}+y$. $f(x|y) = \\frac{x+y}{1/2+y}$.<br>c) $E(X|Y=y) = \\frac{1/3+y/2}{1/2+y}$." }, { q: "Thời tiết: Nắng (N), Mây (M), Mưa (R). Chuyển trạng thái theo xích Markov.<br>a) Xây dựng ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.8 & 0.2 & 0 \\\\ 0.4 & 0.4 & 0.2 \\\\ 0 & 0.6 & 0.4 \\end{pmatrix}$.<br>b) $\\pi = [6/13, 5/13, 2/13]$.<br>c) Có. Ergodic." }, { q: "$X(t) = A\\cos(\\omega t) + B\\sin(\\omega t)$, A, B độc lập, $E[A]=E[B]=0, Var(A)=Var(B)=\\sigma^2$. Chứng minh WSS.", a: "$m_X(t) = 0$.<br>$R_{XX}(t_1, t_2) = \\sigma^2 \\cos(\\omega(t_1-t_2))$. Là WSS." }, { q: "$Y(t) = At + B$, A, B có $E[A]=E[B]=0, E[A^2]=1, E[B^2]=1, E[AB]=0$. Có dừng không?", a: "$m_Y(t) = 0$.<br>$R_{YY}(t_1, t_2) = t_1t_2+1$. Không dừng." } ]
+            },
+            {
+                title: "Đề 4", questions: [ { q: "$f(x,y)=c$ với $x^2+y^2 \\le 1$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=1/\\pi$.<br>b) $f_Y(y) = \\frac{2\\sqrt{1-y^2}}{\\pi}$. $f(x|y) = \\frac{1}{2\\sqrt{1-y^2}}$.<br>c) $E(X|Y=y) = 0$." }, { q: "Cổ phiếu: Tăng (T), Giảm (G), Đứng giá (D). Chuyển trạng thái theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.6 & 0.1 & 0.3 \\\\ 0.2 & 0.5 & 0.3 \\\\ 0.4 & 0.4 & 0.2 \\end{pmatrix}$.<br>b) $\\pi \\approx [0.41, 0.31, 0.28]$.<br>c) Có. Ergodic." }, { q: "$X(t) = Ae^{j\\omega t}$, A là BNN phức, $E[A]=0, E[|A|^2]=1$. Chứng minh WSS.", a: "$m_X(t)=0$.<br>$R_{XX}(t_1,t_2) = e^{j\\omega(t_1-t_2)}$. Là WSS." }, { q: "$X(t) = \\cos(\\omega t + \\Phi)$, $\\Phi$ có $f(\\phi)=\\frac{\\phi}{2\\pi^2}$. Có dừng không?", a: "$m_X(t) = \\frac{\\sin(\\omega t)}{\\pi}$. Không dừng." } ]
+            },
+            {
+                title: "Đề 5", questions: [ { q: "$f(x, y) = c(x^2 + y)$ với $0<x<1, 0<y<2$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=3/8$.<br>b) $f(x|y) = \\frac{x^2+y}{1/3+y}$.<br>c) $E(X|Y=y) = \\frac{1/4+y/2}{1/3+y}$." }, { q: "Sách: Trên giá (G), Được mượn (M). Chuyển trạng thái theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm tỷ lệ dài hạn.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.9 & 0.1 \\\\ 0.05 & 0.95 \\end{pmatrix}$.<br>b) $\\pi=[1/3, 2/3]$.<br>c) Có. Ergodic." }, { q: "$X(t) = A$, A là BNN với $E[A]=\\mu, Var(A)=\\sigma^2$. Chứng minh dừng.", a: "$m_X(t) = \\mu$.<br>$R_{XX}(t_1,t_2) = \\sigma^2+\\mu^2$. Là WSS." }, { q: "$Y(t) = A\\sin(\\omega t + \\Phi)$, $\\omega, \\Phi$ hằng số, $E[A]=0$. Có dừng không?", a: "$m_Y(t)=0$.<br>$R_{YY}(t_1,t_2) = E[A^2]\\sin(\\omega t_1+\\Phi)\\sin(\\omega t_2+\\Phi)$. Không dừng." } ]
+            },
+            {
+                title: "Đề 6", questions: [ { q: "$f(x,y)=cxy$ với $0<y<x<1$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=8$.<br>b) $f(x|y)=\\frac{2x}{1-y^2}$.<br>c) $E(X|Y=y)=\\frac{2(1-y^3)}{3(1-y^2)}$." }, { q: "Chuột trong mê cung 3 phòng A,B,C. Chuyển trạng thái theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0&1&0 \\\\ 0.5&0&0.5 \\\\ 0&1&0 \\end{pmatrix}$.<br>b) $\\pi=[1/4, 1/2, 1/4]$.<br>c) Không. Có chu kỳ 2." }, { q: "$X(t) = A\\cos(\\Omega t)$, A hằng số, $\\Omega$ phân phối đều $[0,2\\pi]$. Có dừng không?", a: "$m_X(t) = \\frac{A\\sin(2\\pi t)}{2\\pi t}$. Không dừng." }, { q: "$X(t)$ là WSS. Xét $Y(t) = X(t) - X(t-d)$. Chứng minh $Y(t)$ là WSS.", a: "$m_Y(t)=0$.<br>$R_{YY}(\\tau) = 2R_X(\\tau) - R_X(\\tau-d) - R_X(\\tau+d)$. Là WSS." } ]
+            },
+            {
+                title: "Đề 7", questions: [ { q: "$f(x,y)=c(x+y^2)$ với $0<x<2, 0<y<1$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=3/8$.<br>b) $f(x|y)=\\frac{x+y^2}{2(1+y^2)}$.<br>c) $E(X|Y=y)=\\frac{4/3+y^2}{1+y^2}$." }, { q: "Máy chủ A, B. Chuyển yêu cầu theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.7 & 0.3 \\\\ 0.4 & 0.6 \\end{pmatrix}$.<br>b) $\\pi=[4/7, 3/7]$.<br>c) Có. Ergodic." }, { q: "$X(t) = A\\cos(\\omega t) + B\\sin(\\omega t)$, $E[A]=1, E[B]=2$. Có dừng không?", a: "$m_X(t) = \\cos(\\omega t) + 2\\sin(\\omega t)$. Không dừng." }, { q: "$X(t) = Ae^{j(\\omega t+\\Phi)}$, $\\Phi$ phân phối đều $[0, \\pi]$. Có WSS không?", a: "$m_X(t) = \\frac{-2A}{j\\pi}e^{j\\omega t}$. Không WSS." } ]
+            },
+            {
+                title: "Đề 8", questions: [ { q: "$f(x,y)=\\frac{c}{(1+x+y)^3}$ với $x,y>0$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=2$.<br>b) $f(x|y)=\\frac{2(1+y)^2}{(1+x+y)^3}$.<br>c) $E(X|Y=y)=(1+y)/2$." }, { q: "Cờ bạc: Thắng (T), Thua (L), Hòa (H). Chuyển ván theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.6&0.1&0.3 \\\\ 0.1&0.7&0.2 \\\\ 0.4&0.4&0.2 \\end{pmatrix}$.<br>b) $\\pi \\approx [0.35, 0.45, 0.2]$.<br>c) Có. Ergodic." }, { q: "$X(t) = \\cos(t + \\Phi)$, $P(\\Phi=0)=P(\\Phi=\\pi)=0.5$. Có dừng không?", a: "$m_X(t)=0$.<br>$R_{XX}(t_1,t_2)=\\cos(t_1)\\cos(t_2)$. Không WSS." }, { q: "$X(t)$ là WSS. $Y(t) = aX(t)+b$. Chứng minh $Y(t)$ là WSS.", a: "$m_Y(t)=a\\mu_X+b$.<br>$R_{YY}(\\tau)=a^2R_X(\\tau)+2ab\\mu_X+b^2$. Là WSS." } ]
+            },
+            {
+                title: "Đề 9", questions: [ { q: "$f(x,y)=ce^{-(x+y)/2}$ với $0<x<y$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=1/2$.<br>b) $f(x|y)=\\frac{e^{-x/2}}{2(1-e^{-y/2})}$.<br>c) $E(X|Y=y)=y-\\frac{y}{e^{y/2}-1}$." }, { q: "Chương trình A, B, C. Chuyển module theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm phân phối dừng.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0&0.5&0.5 \\\\ 1&0&0 \\\\ 1&0&0 \\end{pmatrix}$.<br>b) $\\pi=[1/2, 1/4, 1/4]$.<br>c) Không Ergodic (không đi từ B đến C được)." }, { q: "$X(t)=A\\sin(t)+B\\cos(t+\\Phi)$, $\\Phi$ phân phối đều $[0, 2\\pi]$. Có dừng không?", a: "$m_X(t)=A\\sin(t)$. Không dừng." }, { q: "$Z(t) = A\\cos(\\omega t) + B\\sin(\\omega t)$. Chứng minh $Z(t)$ là WSS.", a: "Giống hệt câu 3, đề 3. Là WSS." } ]
+            },
+            {
+                title: "Đề 10", questions: [ { q: "$f(x,y)=c(2x+y)$ với $0<x<1, 0<y<x^2$.<br>a) Tìm c.<br>b) Tìm $f(x|y)$.<br>c) Tính $E(X|Y=y)$.", a: "a) $c=5/3$.<br>b) $f(x|y)=\\frac{2x+y}{1-y^{3/2}}$.<br>c) $E(X|Y=y)=\\int_{\\sqrt{y}}^1 x \\frac{2x+y}{1-y^{3/2}} dx$." }, { q: "Khách hàng chọn A, B. Chuyển đổi theo xích Markov.<br>a) Viết ma trận P.<br>b) Tìm thị phần dài hạn.<br>c) Xích này có Ergodic không?", a: "a) $P = \\begin{pmatrix} 0.8 & 0.2 \\\\ 0.3 & 0.7 \\end{pmatrix}$.<br>b) $\\pi=[3/5, 2/5]$.<br>c) Có. Ergodic." }, { q: "$Y_n=X_n+X_{n-1}$ với $X_n$ là i.i.d. Chứng minh $Y_n$ là WSS.", a: "$m_{Y_n}=2\\mu$.<br>$R_{YY}(k)$ phụ thuộc $k$ (khoảng cách). Là WSS." }, { q: "$Z(t)=X\\cos(\\omega t)-Y\\sin(\\omega t)$. Chứng minh $Z(t)$ là WSS.", a: "$m_Z(t)=0$.<br>$R_{ZZ}(\\tau) = \\sigma^2\\cos(\\omega\\tau)$. Là WSS." } ]
+            }
+        ];
+
+        const selector = document.getElementById('test-selector');
+        const contentArea = document.getElementById('test-content');
+
+        function initialize() {
+            populateSelector();
+            selector.addEventListener('change', (e) => displayTest(e.target.value));
+            displayTest(0);
+        }
+
+        function populateSelector() {
+            practiceData.forEach((test, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = test.title;
+                selector.appendChild(option);
+            });
+        }
+
+        function displayTest(index) {
+            contentArea.innerHTML = '';
+            const test = practiceData[index];
+            if (!test) return;
+            
+            const intro = document.createElement('div');
+            intro.className = 'text-center mb-4';
+            intro.innerHTML = `<h2 class="text-2xl font-semibold text-slate-800">${test.title}</h2><p class="text-slate-500">Hãy thử giải các bài toán dưới đây trước khi xem đáp án.</p>`;
+            contentArea.appendChild(intro);
+
+            test.questions.forEach((q, i) => {
+                const questionId = `q-${index}-${i}`;
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-md p-6 transition-shadow duration-300 hover:shadow-lg';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-semibold mb-3 text-slate-800">Câu ${i + 1}</h3>
+                        <button data-target="${questionId}" class="toggle-answer-btn bg-indigo-100 text-indigo-700 font-semibold px-4 py-2 rounded-lg hover:bg-indigo-200 transition-colors duration-200 text-sm flex-shrink-0">
+                            Hiện đáp án
+                        </button>
+                    </div>
+                    <div class="prose prose-slate max-w-none text-slate-700 leading-relaxed">${q.q}</div>
+                    <div id="${questionId}" class="prose prose-slate max-w-none mt-4 border-t border-slate-200 pt-4 text-slate-600 hidden leading-relaxed">
+                        <h4 class="font-semibold text-slate-700">Lời giải chi tiết:</h4>
+                        ${q.a}
+                    </div>
+                `;
+                contentArea.appendChild(card);
+            });
+
+            contentArea.querySelectorAll('.toggle-answer-btn').forEach(btn => {
+                btn.addEventListener('click', toggleAnswer);
+            });
+            
+            renderMathInElement(contentArea);
+        }
+
+        function toggleAnswer(event) {
+            const button = event.currentTarget;
+            const targetId = button.getAttribute('data-target');
+            const answerDiv = document.getElementById(targetId);
+            
+            const isHidden = answerDiv.classList.contains('hidden');
+            if (isHidden) {
+                answerDiv.classList.remove('hidden');
+                button.textContent = 'Ẩn đáp án';
+                button.classList.remove('bg-indigo-100', 'text-indigo-700');
+                button.classList.add('bg-slate-200', 'text-slate-800');
+            } else {
+                answerDiv.classList.add('hidden');
+                button.textContent = 'Hiện đáp án';
+                button.classList.remove('bg-slate-200', 'text-slate-800');
+                button.classList.add('bg-indigo-100', 'text-indigo-700');
+            }
+        }
+
+        function renderMathInElement(elem) {
+             if (window.renderMathInElement) {
+                renderMathInElement(elem, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initialize);
+
+    </script>
+</body>
+</html>
