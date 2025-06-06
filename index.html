@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ học tập - Xác suất có điều kiện</title>
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is structured around a central navigation list of 10 problems and a dynamic content display area. This non-linear, task-oriented design allows users to directly access any problem without sequential scrolling, enhancing usability for study and review. When a problem is selected, its solution is presented in an interactive accordion, with each part (a, b, c) initially hidden. This encourages active problem-solving by letting the user attempt a solution before revealing the answer. This structure is more engaging and effective for a learning tool than a static, linear document. -->
+    <!-- Visualization & Content Choices: The primary content is mathematical theory and formulas. Goal: Present complex mathematical notation clearly. Viz/Presentation Method: All mathematical formulas from the report are rendered using the KaTeX library, which converts LaTeX syntax into clean, readable typography. This is essential for accuracy and understanding. Goal: Organize problem and solution steps. Viz/Presentation Method: Accordion UI component (built with HTML/Tailwind/JS). Interaction: Users click to toggle the visibility of solutions for parts a, b, and c. Justification: This promotes active learning and prevents users from being overwhelmed by a long wall of text and formulas. Library/Method: KaTeX for formula rendering, custom JS for interactivity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMcAreqynVpgpFeGBvyyma4UScMhdQRV50T41WgO/rLQmOaik" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzYCEHPNKAev8TavKBEI4YLS5jGHEcWl4KA" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .katex-display {
+            margin: 0.5em 0;
+            text-align: left;
+        }
+        .solution-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .solution-content.show {
+            max-height: 1000px; /* Large enough to fit content */
+            opacity: 1;
+        }
+        .nav-button.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-800">Công cụ học tập Xác suất có điều kiện</h1>
+            <p class="mt-2 text-stone-600">Chọn một đề bài để xem lời giải chi tiết và tương tác.</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Navigation -->
+            <aside class="w-full md:w-1/4">
+                <nav class="bg-white p-4 rounded-lg shadow-md">
+                    <h2 class="text-lg font-semibold mb-3 border-b pb-2 text-stone-700">Danh sách đề bài</h2>
+                    <ul id="problem-navigation" class="space-y-2">
+                        <!-- Navigation items will be injected by JS -->
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Content Display -->
+            <main id="content-display" class="w-full md:w-3/4 bg-white p-6 md:p-8 rounded-lg shadow-md min-h-[60vh]">
+                 <div class="text-center text-stone-500 h-full flex flex-col justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h2 class="text-xl font-medium">Chào mừng bạn!</h2>
+                    <p>Vui lòng chọn một đề bài từ danh sách bên trái để bắt đầu.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const problemsData = [
+            {
+                title: "Đề 1",
+                pdf: "f(x, y) = cxy \\quad \\text{nếu } 0 \\le x \\le 1, 0 \\le y \\le 2",
+                solution: {
+                    a: "\\int_{0}^{2} \\int_{0}^{1} cxy \\,dx\\,dy = 1 \\implies c \\int_{0}^{2} y \\left[ \\frac{x^2}{2} \\right]_{0}^{1} \\,dy = 1 \\\\ c \\int_{0}^{2} \\frac{y}{2} \\,dy = 1 \\implies \\frac{c}{2} \\left[ \\frac{y^2}{2} \\right]_{0}^{2} = 1 \\implies \\frac{c}{2} \\cdot \\frac{4}{2} = c = 1",
+                    b: "f_Y(y) = \\int_{0}^{1} xy \\,dx = y \\left[ \\frac{x^2}{2} \\right]_{0}^{1} = \\frac{y}{2}, \\quad \\text{với } 0 \\le y \\le 2 \\\\ f(x|y) = \\frac{f(x, y)}{f_Y(y)} = \\frac{xy}{y/2} = 2x, \\quad \\text{với } 0 \\le x \\le 1",
+                    c: "E(X|Y) = \\int_{0}^{1} x \\cdot f(x|y) \\,dx = \\int_{0}^{1} x(2x) \\,dx = \\int_{0}^{1} 2x^2 \\,dx = \\left[ \\frac{2x^3}{3} \\right]_{0}^{1} = \\frac{2}{3}"
+                }
+            },
+            {
+                title: "Đề 2",
+                pdf: "f(x, y) = c(x^2+y) \\quad \\text{nếu } 0 \\le x \\le 1, 0 \\le y \\le 1",
+                solution: {
+                    a: "\\int_{0}^{1} \\int_{0}^{1} c(x^2+y) \\,dx\\,dy = 1 \\implies c \\int_{0}^{1} \\left[ \\frac{x^3}{3} + xy \\right]_{0}^{1} \\,dy = 1 \\\\ c \\int_{0}^{1} \\left( \\frac{1}{3} + y \\right) \\,dy = 1 \\implies c \\left[ \\frac{y}{3} + \\frac{y^2}{2} \\right]_{0}^{1} = c \\frac{5}{6} = 1 \\implies c = \\frac{6}{5}",
+                    b: "f_Y(y) = \\int_{0}^{1} \\frac{6}{5}(x^2+y) \\,dx = \\frac{6}{5} \\left( \\frac{1}{3} + y \\right), \\quad \\text{với } 0 \\le y \\le 1 \\\\ f(x|y) = \\frac{\\frac{6}{5}(x^2+y)}{\\frac{6}{5}(\\frac{1}{3}+y)} = \\frac{x^2+y}{1/3+y} = \\frac{3(x^2+y)}{1+3y}, \\quad \\text{với } 0 \\le x \\le 1",
+                    c: "E(X|Y) = \\int_{0}^{1} x \\frac{3(x^2+y)}{1+3y} \\,dx = \\frac{3}{1+3y} \\int_{0}^{1} (x^3+xy) \\,dx \\\\ = \\frac{3}{1+3y} \\left[ \\frac{x^4}{4} + \\frac{x^2y}{2} \\right]_{0}^{1} = \\frac{3}{1+3y} \\left( \\frac{1}{4} + \\frac{y}{2} \\right) = \\frac{3(1+2y)}{4(1+3y)}"
+                }
+            },
+            {
+                title: "Đề 3",
+                pdf: "f(x, y) = c \\quad \\text{nếu } 0 \\le y \\le x \\le 1",
+                solution: {
+                    a: "\\int_{0}^{1} \\int_{0}^{x} c \\,dy\\,dx = 1 \\implies \\int_{0}^{1} c[y]_{0}^{x} \\,dx = 1 \\implies \\int_{0}^{1} cx \\,dx = 1 \\\\ c \\left[ \\frac{x^2}{2} \\right]_{0}^{1} = 1 \\implies \\frac{c}{2} = 1 \\implies c = 2",
+                    b: "f_Y(y) = \\int_{y}^{1} 2 \\,dx = 2[x]_{y}^{1} = 2(1-y), \\quad \\text{với } 0 \\le y \\le 1 \\\\ f(x|y) = \\frac{f(x,y)}{f_Y(y)} = \\frac{2}{2(1-y)} = \\frac{1}{1-y}, \\quad \\text{với } y \\le x \\le 1",
+                    c: "E(X|Y) = \\int_{y}^{1} x \\frac{1}{1-y} \\,dx = \\frac{1}{1-y} \\left[ \\frac{x^2}{2} \\right]_{y}^{1} = \\frac{1-y^2}{2(1-y)} = \\frac{(1-y)(1+y)}{2(1-y)} = \\frac{1+y}{2}"
+                }
+            },
+            {
+                title: "Đề 4",
+                pdf: "f(x, y) = cx^2y \\quad \\text{nếu } 0 \\le x \\le 1, 0 \\le y \\le 2",
+                solution: {
+                    a: "\\int_{0}^{2} \\int_{0}^{1} cx^2y \\,dx\\,dy = 1 \\implies c \\int_{0}^{2} y \\left[ \\frac{x^3}{3} \\right]_{0}^{1} \\,dy = 1 \\\\ c \\int_{0}^{2} \\frac{y}{3} \\,dy = 1 \\implies \\frac{c}{3} \\left[ \\frac{y^2}{2} \\right]_{0}^{2} = 1 \\implies \\frac{2c}{3} = 1 \\implies c = \\frac{3}{2}",
+                    b: "f_Y(y) = \\int_{0}^{1} \\frac{3}{2}x^2y \\,dx = \\frac{3y}{2} \\left[ \\frac{x^3}{3} \\right]_{0}^{1} = \\frac{y}{2}, \\quad \\text{với } 0 \\le y \\le 2 \\\\ f(x|y) = \\frac{\\frac{3}{2}x^2y}{y/2} = 3x^2, \\quad \\text{với } 0 \\le x \\le 1",
+                    c: "E(X|Y) = \\int_{0}^{1} x(3x^2) \\,dx = \\int_{0}^{1} 3x^3 \\,dx = \\left[ \\frac{3x^4}{4} \\right]_{0}^{1} = \\frac{3}{4}"
+                }
+            },
+            {
+                title: "Đề 5",
+                pdf: "f(x, y) = c(x+y) \\quad \\text{nếu } 0 \\le x \\le y \\le 2",
+                solution: {
+                    a: "\\int_{0}^{2} \\int_{0}^{y} c(x+y) \\,dx\\,dy = 1 \\implies c \\int_{0}^{2} \\left[ \\frac{x^2}{2} + xy \\right]_{0}^{y} \\,dy = 1 \\\\ c \\int_{0}^{2} \\frac{3y^2}{2} \\,dy = 1 \\implies c \\left[ \\frac{y^3}{2} \\right]_{0}^{2} = 4c = 1 \\implies c = \\frac{1}{4}",
+                    b: "f_Y(y) = \\int_{0}^{y} \\frac{1}{4}(x+y) \\,dx = \\frac{1}{4} \\left( \\frac{y^2}{2} + y^2 \\right) = \\frac{3y^2}{8}, \\quad \\text{với } 0 \\le y \\le 2 \\\\ f(x|y) = \\frac{\\frac{1}{4}(x+y)}{\\frac{3y^2}{8}} = \\frac{2(x+y)}{3y^2}, \\quad \\text{với } 0 \\le x \\le y",
+                    c: "E(X|Y) = \\int_{0}^{y} x \\frac{2(x+y)}{3y^2} \\,dx = \\frac{2}{3y^2} \\int_{0}^{y} (x^2+xy) \\,dx \\\\ = \\frac{2}{3y^2} \\left[ \\frac{x^3}{3} + \\frac{x^2y}{2} \\right]_{0}^{y} = \\frac{2}{3y^2} \\left( \\frac{5y^3}{6} \\right) = \\frac{5y}{9}"
+                }
+            },
+            {
+                title: "Đề 6",
+                pdf: "f(x, y) = ce^{-x} \\quad \\text{nếu } 0 \\le y \\le x < \\infty",
+                solution: {
+                    a: "\\int_{0}^{\\infty} \\int_{0}^{x} ce^{-x} \\,dy\\,dx = 1 \\implies c \\int_{0}^{\\infty} e^{-x}[y]_{0}^{x} \\,dx = c \\int_{0}^{\\infty} xe^{-x} \\,dx = 1 \\\\ \\text{Tích phân từng phần: } c [-xe^{-x} - e^{-x}]_{0}^{\\infty} = c(0 - (-1)) = c = 1.",
+                    b: "f_Y(y) = \\int_{y}^{\\infty} e^{-x} \\,dx = [-e^{-x}]_{y}^{\\infty} = e^{-y}, \\quad \\text{với } y \\ge 0 \\\\ f(x|y) = \\frac{e^{-x}}{e^{-y}} = e^{-(x-y)}, \\quad \\text{với } x \\ge y",
+                    c: "E(X|Y) = \\int_{y}^{\\infty} x e^{-(x-y)} \\,dx = e^y \\int_{y}^{\\infty} x e^{-x} \\,dx \\\\ = e^y [-xe^{-x} - e^{-x}]_{y}^{\\infty} = e^y(0 - (-ye^{-y} - e^{-y})) = y+1"
+                }
+            },
+            {
+                title: "Đề 7",
+                pdf: "f(x, y) = cy \\quad \\text{nếu } 0 \\le x \\le 1, 0 \\le y \\le x^2",
+                solution: {
+                    a: "\\int_{0}^{1} \\int_{0}^{x^2} cy \\,dy\\,dx = 1 \\implies c \\int_{0}^{1} \\left[ \\frac{y^2}{2} \\right]_{0}^{x^2} \\,dx = c \\int_{0}^{1} \\frac{x^4}{2} \\,dx = 1 \\\\ c \\left[ \\frac{x^5}{10} \\right]_{0}^{1} = \\frac{c}{10} = 1 \\implies c=10",
+                    b: "f_Y(y) = \\int_{\\sqrt{y}}^{1} 10y \\,dx = 10y[x]_{\\sqrt{y}}^{1} = 10y(1-\\sqrt{y}), \\quad \\text{với } 0 \\le y \\le 1 \\\\ f(x|y) = \\frac{10y}{10y(1-\\sqrt{y})} = \\frac{1}{1-\\sqrt{y}}, \\quad \\text{với } \\sqrt{y} \\le x \\le 1",
+                    c: "E(X|Y) = \\int_{\\sqrt{y}}^{1} x \\frac{1}{1-\\sqrt{y}} \\,dx = \\frac{1}{1-\\sqrt{y}} \\left[ \\frac{x^2}{2} \\right]_{\\sqrt{y}}^{1} = \\frac{1-y}{2(1-\\sqrt{y})} = \\frac{1+\\sqrt{y}}{2}"
+                }
+            },
+            {
+                title: "Đề 8",
+                pdf: "f(x, y) = c(x^2+y) \\quad \\text{nếu } 0 \\le y \\le x \\le 1",
+                solution: {
+                    a: "\\int_{0}^{1} \\int_{0}^{x} c(x^2+y) \\,dy\\,dx = 1 \\implies c \\int_{0}^{1} [x^2y + \\frac{y^2}{2}]_{0}^{x} \\,dx = 1 \\\\ c \\int_{0}^{1} (x^3 + \\frac{x^2}{2}) \\,dx = c[\\frac{x^4}{4}+\\frac{x^3}{6}]_0^1 = c\\frac{5}{12}=1 \\implies c=\\frac{12}{5}",
+                    b: "f_Y(y) = \\int_{y}^{1} \\frac{12}{5}(x^2+y) \\,dx = \\frac{12}{5} [\\frac{x^3}{3}+xy]_y^1 = \\frac{4}{5}(1+3y-3y^2-y^3) \\\\ f(x|y) = \\frac{3(x^2+y)}{1+3y-3y^2-y^3}, \\quad \\text{với } y \\le x \\le 1",
+                    c: "E(X|Y) = \\int_y^1 x f(x|y) dx = \\frac{3}{1+3y-3y^2-y^3} \\int_y^1 (x^3+xy) dx \\\\ = \\frac{3[\\frac{x^4}{4}+\\frac{x^2y}{2}]_y^1}{1+3y-3y^2-y^3} = \\frac{3(1+2y-2y^3-y^4)}{4(1+3y-3y^2-y^3)}"
+                }
+            },
+            {
+                title: "Đề 9",
+                pdf: "f(x, y) = c(2x+y) \\quad \\text{nếu } 0 \\le x \\le 2, 0 \\le y \\le 1",
+                solution: {
+                    a: "\\int_{0}^{1} \\int_{0}^{2} c(2x+y) \\,dx\\,dy = 1 \\implies c \\int_{0}^{1} [x^2+xy]_0^2 \\,dy = c \\int_0^1 (4+2y) \\,dy = 1 \\\\ c[4y+y^2]_0^1 = 5c=1 \\implies c = \\frac{1}{5}",
+                    b: "f_Y(y) = \\int_0^2 \\frac{1}{5}(2x+y) \\,dx = \\frac{1}{5}[x^2+xy]_0^2 = \\frac{4+2y}{5}, \\quad \\text{với } 0 \\le y \\le 1 \\\\ f(x|y) = \\frac{2x+y}{4+2y}, \\quad \\text{với } 0 \\le x \\le 2",
+                    c: "E(X|Y) = \\int_0^2 x \\frac{2x+y}{4+2y} \\,dx = \\frac{1}{4+2y} \\int_0^2 (2x^2+xy) \\,dx \\\\ = \\frac{1}{4+2y} [\\frac{2x^3}{3}+\\frac{x^2y}{2}]_0^2 = \\frac{\\frac{16}{3}+2y}{4+2y} = \\frac{16+6y}{3(4+2y)} = \\frac{8+3y}{3(2+y)}"
+                }
+            },
+            {
+                title: "Đề 10",
+                pdf: "f(x, y) = ce^{-(x+2y)} \\quad \\text{nếu } x \\ge 0, y \\ge 0",
+                solution: {
+                    a: "\\int_0^\\infty \\int_0^\\infty ce^{-x}e^{-2y} \\,dx\\,dy = c(\\int_0^\\infty e^{-x}dx)(\\int_0^\\infty e^{-2y}dy) = 1 \\\\ c(1)([-\\frac{1}{2}e^{-2y}]_0^\\infty) = c(\\frac{1}{2}) = 1 \\implies c=2",
+                    b: "\\text{Vì X và Y độc lập, } f(x|y) = f_X(x). \\\\ f_X(x) = \\int_0^\\infty 2e^{-x}e^{-2y} dy = 2e^{-x} \\int_0^\\infty e^{-2y} dy = e^{-x}, \\quad \\text{với } x \\ge 0 \\\\ \\text{Do đó, } f(x|y) = e^{-x}",
+                    c: "\\text{Vì X và Y độc lập, } E(X|Y) = E(X). \\\\ E(X) = \\int_0^\\infty x f_X(x) dx = \\int_0^\\infty xe^{-x} dx = 1"
+                }
+            }
+        ];
+
+        const navContainer = document.getElementById('problem-navigation');
+        const contentDisplay = document.getElementById('content-display');
+
+        function renderProblem(index) {
+            const problem = problemsData[index];
+            if (!problem) return;
+
+            // Update active state in navigation
+            document.querySelectorAll('#problem-navigation .nav-button').forEach((btn, i) => {
+                 btn.classList.toggle('active', i === index);
+            });
+            
+            const contentHTML = `
+                <h2 class="text-2xl font-bold text-sky-700 mb-4">${problem.title}</h2>
+                <div class="mb-6">
+                    <h3 class="font-semibold text-lg mb-2">Đề bài:</h3>
+                    <div class="p-4 bg-stone-100 rounded-md text-lg" data-katex-display="${problem.pdf}"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Part a -->
+                    <div>
+                        <button data-target="solution-a" class="solution-toggle-btn w-full text-left p-3 bg-sky-50 hover:bg-sky-100 rounded-md font-semibold transition flex justify-between items-center">
+                            a) Lời giải tìm hằng số c
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div id="solution-a" class="solution-content p-4 border-l-4 border-sky-200 bg-stone-50 rounded-b-md">
+                            <div data-katex-display="${problem.solution.a}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Part b -->
+                    <div>
+                        <button data-target="solution-b" class="solution-toggle-btn w-full text-left p-3 bg-sky-50 hover:bg-sky-100 rounded-md font-semibold transition flex justify-between items-center">
+                            b) Lời giải tìm f(x|y)
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div id="solution-b" class="solution-content p-4 border-l-4 border-sky-200 bg-stone-50 rounded-b-md">
+                            <div data-katex-display="${problem.solution.b}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Part c -->
+                    <div>
+                        <button data-target="solution-c" class="solution-toggle-btn w-full text-left p-3 bg-sky-50 hover:bg-sky-100 rounded-md font-semibold transition flex justify-between items-center">
+                            c) Lời giải tính E(X|Y)
+                             <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div id="solution-c" class="solution-content p-4 border-l-4 border-sky-200 bg-stone-50 rounded-b-md">
+                             <div data-katex-display="${problem.solution.c}"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            contentDisplay.innerHTML = contentHTML;
+            renderAllKatex();
+            setupAccordionListeners();
+        }
+
+        function renderAllKatex() {
+            document.querySelectorAll('[data-katex-display]').forEach(el => {
+                katex.render(el.getAttribute('data-katex-display'), el, {
+                    throwOnError: false,
+                    displayMode: true
+                });
+            });
+        }
+        
+        function setupAccordionListeners() {
+            document.querySelectorAll('.solution-toggle-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    const content = document.getElementById(targetId);
+                    const icon = button.querySelector('span');
+
+                    if(content.classList.contains('show')) {
+                        content.classList.remove('show');
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.classList.add('show');
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        }
+
+        function initializeApp() {
+            // Populate navigation
+            problemsData.forEach((problem, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<button class="nav-button w-full text-left p-2.5 rounded-md hover:bg-sky-100 transition duration-200">${problem.title}</button>`;
+                li.querySelector('button').addEventListener('click', () => renderProblem(index));
+                navContainer.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+</body>
+</html>
